@@ -9,6 +9,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import exceptions.DeckException;
 import exceptions.HandException;
 import pokerEnums.*;
@@ -16,8 +19,10 @@ import pokerEnums.*;
 import static java.lang.System.out;
 import static java.lang.System.err;
 
+@XmlRootElement
 public class Hand {
 
+	@XmlElement(name="Card")
 	private ArrayList<Card> CardsInHand;
 	private ArrayList<Card> BestCardsInHand;
 	private HandScore HandScore;
@@ -27,7 +32,12 @@ public class Hand {
 		CardsInHand = new ArrayList<Card>();
 		BestCardsInHand = new ArrayList<Card>();
 	}
-
+	
+	@XmlElement
+	private int getCardCount() 
+	{
+		return CardsInHand.size();
+	}
 	public ArrayList<Card> getCardsInHand() {
 		return CardsInHand;
 	}
@@ -52,6 +62,7 @@ public class Hand {
 		HandScore = handScore;
 	}
 
+	@XmlElement(name="Scored")
 	public boolean isbScored() {
 		return bScored;
 	}
@@ -124,6 +135,15 @@ public class Hand {
 			e.printStackTrace();
 		}
 		return h;
+	}
+	
+	public static Hand PickBestHand(ArrayList<Hand> hands) throws HandException{
+		Collections.sort(hands, Hand.HandRank);
+		Hand bestHand = hands.get(0);
+		if(bestHand == hands.get(1))
+			throw new HandException(bestHand);
+		return bestHand;
+		
 	}
 
 	private static boolean isHandFlush(ArrayList<Card> cards) {
@@ -205,6 +225,28 @@ public class Hand {
 		}
 		return isFive;
 	}
+	
+	public static boolean isHandNaturalRoyalFlush(Hand h, HandScore hs) {
+
+		Card c = new Card();
+		boolean isHandNaturalRoyalFlush = false;
+		if ((isHandFlush(h.getCardsInHand())) && (isStraight(h.getCardsInHand(), c))) {
+			if (h.getCardsInHand().get(eCardNo.FirstCard.getCardNo()).geteRank() != eRank.JOKER
+					&& h.getCardsInHand().get(eCardNo.SecondCard.getCardNo()).geteRank() != eRank.JOKER
+					&& h.getCardsInHand().get(eCardNo.ThirdCard.getCardNo()).geteRank() != eRank.JOKER
+					&& h.getCardsInHand().get(eCardNo.FourthCard.getCardNo()).geteRank() != eRank.JOKER
+					&& h.getCardsInHand().get(eCardNo.FifthCard.getCardNo()).geteRank() != eRank.JOKER)
+					{
+				isHandNaturalRoyalFlush = true;
+				hs.setHandStrength(eHandStrength.RoyalFlush.getHandStrength());
+				hs.setHiHand(h.getCardsInHand().get(eCardNo.FirstCard.getCardNo()).geteRank().getiRankNbr());
+				hs.setLoHand(0);
+			}
+
+		}
+
+		return isHandNaturalRoyalFlush;
+	}
 
 	public static boolean isHandRoyalFlush(Hand h, HandScore hs) {
 
@@ -225,15 +267,15 @@ public class Hand {
 
 	public static boolean isHandStraightFlush(Hand h, HandScore hs) {
 		Card c = new Card();
-		boolean isRoyalFlush = false;
+		boolean StraightFlush = false;
 		if ((isHandFlush(h.getCardsInHand())) && (isStraight(h.getCardsInHand(), c))) {
-			isRoyalFlush = true;
+			StraightFlush = true;
 			hs.setHandStrength(eHandStrength.StraightFlush.getHandStrength());
 			hs.setHiHand(h.getCardsInHand().get(eCardNo.FirstCard.getCardNo()).geteRank().getiRankNbr());
 			hs.setLoHand(0);
 		}
 
-		return isRoyalFlush;
+		return StraightFlush;
 	}
 
 	public static boolean isHandFourOfAKind(Hand h, HandScore hs) {

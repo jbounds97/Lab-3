@@ -47,15 +47,28 @@ public class Deck {
 	
 	
 	public Deck (int NbrOfJokers, ArrayList<Card> wilds)
-	{
-		this(NbrOfJokers);
-		
-		// Work to do!  Make the existing Deck cards Wild...  
-		
-	}
+    {
+        this();
+        
+        for (int i = 0; i<NbrOfJokers;i++)
+        {
+            deckCards.add(new Card(eSuit.JOKER, eRank.JOKER, 53));
+        }
+        Collections.shuffle(deckCards);  
+        
+        for(Card card1: deckCards){
+            for(Card card2: wilds){
+                if((card1.geteRank() == card2.geteRank()) && (card1.geteSuit() == card2.geteSuit())){
+                    card1.seteRank(eRank.JOKER);
+                    card1.seteSuit(eSuit.JOKER);
+                }
+                
+            }
+            
+        }
 	
 	
-	
+    }
 	
 	
 	/**
